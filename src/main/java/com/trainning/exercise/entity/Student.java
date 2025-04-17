@@ -28,6 +28,9 @@ public class Student extends AuditingEntity {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "phone")
+    private String phone;
+
     @Column(name = "birthday")
     private Instant birthday;
 }

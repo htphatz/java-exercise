@@ -18,11 +18,12 @@ public class StudentMapper {
                 .name(student.getName())
                 .email(student.getEmail())
                 .address(student.getAddress())
+                .phone(student.getPhone())
                 .age(convertBirthdayToAge(student.getBirthday()))
                 .build();
     }
 
-    private static int convertBirthdayToAge(Instant instant) {
+    public static int convertBirthdayToAge(Instant instant) {
         if (Objects.isNull(instant)) {
             return 0;
         }

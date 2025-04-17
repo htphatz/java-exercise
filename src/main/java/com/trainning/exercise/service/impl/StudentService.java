@@ -1,6 +1,7 @@
 package com.trainning.exercise.service.impl;
 
 import com.trainning.exercise.dto.PageDto;
+import com.trainning.exercise.dto.StudentRequest;
 import com.trainning.exercise.dto.StudentResponse;
 import com.trainning.exercise.entity.Student;
 import com.trainning.exercise.exception.StudentAlreadyExistedException;
@@ -25,10 +26,17 @@ public class StudentService implements IStudentService {
     private final SearchRepository searchRepository;
 
     @Override
-    public Student addStudent(Student student) {
-        if (studentRepository.existsByEmail(student.getEmail())) {
-            throw new StudentAlreadyExistedException("Student with email " + student.getEmail() + " already existed.");
+    public Student addStudent(StudentRequest request) {
+        if (studentRepository.existsByEmail(request.getEmail())) {
+            throw new StudentAlreadyExistedException("Student with email " + request.getEmail() + " already existed.");
         }
+        Student student = Student.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .address(request.getAddress())
+                .phone(request.getPhone())
+                .birthday(request.getBirthday())
+                .build();
         return studentRepository.save(student);
     }
 

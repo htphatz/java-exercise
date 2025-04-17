@@ -1,13 +1,14 @@
 package com.trainning.exercise.service;
 
 import com.trainning.exercise.dto.PageDto;
+import com.trainning.exercise.dto.StudentRequest;
 import com.trainning.exercise.dto.StudentResponse;
 import com.trainning.exercise.entity.Student;
 
 import java.util.List;
 
 public interface IStudentService {
-    Student addStudent(Student student);
+    Student addStudent(StudentRequest request);
     List<Student> getAllStudents();
     List<StudentResponse> getAllStudentsDto();
     PageDto<StudentResponse> searchStudentsByAnnotationQuery(Integer pageNumber, Integer pageSize, String name, String email, String address);

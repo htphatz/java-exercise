@@ -2,11 +2,13 @@ package com.trainning.exercise.controller;
 
 import com.trainning.exercise.dto.APIResponse;
 import com.trainning.exercise.dto.PageDto;
+import com.trainning.exercise.dto.StudentRequest;
 import com.trainning.exercise.dto.StudentResponse;
 import com.trainning.exercise.entity.Student;
 import com.trainning.exercise.service.impl.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +18,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/students")
 @RequiredArgsConstructor
-@Schema(description = "Student API")
+@Tag(name = "Student APIs")
 public class StudentController {
     private final StudentService studentService;
 
     @PostMapping("student")
     @Operation(summary = "Add a new student")
-    public APIResponse<Student> addStudent(@Valid @RequestBody Student student) {
-        Student data = studentService.addStudent(student);
+    public APIResponse<Student> addStudent(@Valid @RequestBody StudentRequest request) {
+        Student data = studentService.addStudent(request);
         return APIResponse.<Student>builder().data(data).build();
     }
 
