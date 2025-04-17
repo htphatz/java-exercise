@@ -1,19 +1,28 @@
 package com.trainning.exercise.service.impl;
 
+import com.trainning.exercise.dto.PageDto;
+import com.trainning.exercise.dto.StudentResponse;
 import com.trainning.exercise.entity.Student;
 import com.trainning.exercise.exception.StudentAlreadyExistedException;
 import com.trainning.exercise.exception.StudentNotFoundException;
+import com.trainning.exercise.mapper.StudentMapper;
+import com.trainning.exercise.repository.SearchRepository;
 import com.trainning.exercise.repository.StudentRepository;
 import com.trainning.exercise.service.IStudentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class StudentService implements IStudentService {
     private final StudentRepository studentRepository;
+    private final SearchRepository searchRepository;
 
     @Override
     public Student addStudent(Student student) {
@@ -26,6 +35,31 @@ public class StudentService implements IStudentService {
     @Override
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
+    }
+
+    @Override
+    public List<StudentResponse> getAllStudentsDto() {
+        return getAllStudents().stream().map(StudentMapper.toDto()).collect(Collectors.toList());
+    }
+
+    @Override
+    public PageDto<StudentResponse> searchStudentsByAnnotationQuery(Integer pageNumber, Integer pageSize, String name, String email, String address) {
+        pageNumber--;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Student> students = studentRepository.searchStudents(name, email, address, pageable);
+        return PageDto.of(students).map(StudentMapper.toDto());
+    }
+
+    @Override
+    public PageDto<StudentResponse> searchStudentsByEntityManager(Integer pageNumber, Integer pageSize, String name, String email, String address) {
+        Page<Student> students = searchRepository.searchStudentsByEntityManager(pageNumber, pageSize, name, email, address);
+        return PageDto.of(students).map(StudentMapper.toDto());
+    }
+
+    @Override
+    public PageDto<StudentResponse> searchStudentsByJdbcTemplate(Integer pageNumber, Integer pageSize, String name, String email, String address) {
+        Page<Student> students = searchRepository.searchStudentsByJdbcTemplate(pageNumber, pageSize, name, email, address);
+        return PageDto.of(students).map(StudentMapper.toDto());
     }
 
     @Override

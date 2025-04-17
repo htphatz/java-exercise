@@ -1,6 +1,8 @@
 package com.trainning.exercise.controller;
 
 import com.trainning.exercise.dto.APIResponse;
+import com.trainning.exercise.dto.PageDto;
+import com.trainning.exercise.dto.StudentResponse;
 import com.trainning.exercise.entity.Student;
 import com.trainning.exercise.service.impl.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +32,52 @@ public class StudentController {
     public APIResponse<List<Student>> findAllStudents() {
         List<Student> data = studentService.getAllStudents();
         return APIResponse.<List<Student>>builder().data(data).build();
+    }
+
+    @GetMapping("/dto")
+    @Operation(summary = "Find all students dto")
+    public APIResponse<List<StudentResponse>> findAllStudentsDto() {
+        List<StudentResponse> data = studentService.getAllStudentsDto();
+        return APIResponse.<List<StudentResponse>>builder().data(data).build();
+    }
+
+    @GetMapping("/search/query")
+    @Operation(summary = "Search student by email, name, address,... by annotation @Query")
+    public APIResponse<PageDto<StudentResponse>> searchStudentsQuery(
+            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
+            @RequestParam(name = "pageSize", required = false, defaultValue = "5") Integer pageSize,
+            @RequestParam(name = "email", required = false) String name,
+            @RequestParam(name = "name", required = false) String email,
+            @RequestParam(name = "address", required = false) String address
+    ) {
+        PageDto<StudentResponse> data = studentService.searchStudentsByAnnotationQuery(pageNumber, pageSize, name, email, address);
+        return APIResponse.<PageDto<StudentResponse>>builder().data(data).build();
+    }
+
+    @GetMapping("/search/entity-manager")
+    @Operation(summary = "Search student by email, name, address,... by EntityManager")
+    public APIResponse<PageDto<StudentResponse>> searchStudentsEntityManager(
+            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
+            @RequestParam(name = "pageSize", required = false, defaultValue = "5") Integer pageSize,
+            @RequestParam(name = "email", required = false) String name,
+            @RequestParam(name = "name", required = false) String email,
+            @RequestParam(name = "address", required = false) String address
+    ) {
+        PageDto<StudentResponse> data = studentService.searchStudentsByEntityManager(pageNumber, pageSize, name, email, address);
+        return APIResponse.<PageDto<StudentResponse>>builder().data(data).build();
+    }
+
+    @GetMapping("/search/jdbc-template")
+    @Operation(summary = "Search student by email, name, address,... by JdbcTemplate")
+    public APIResponse<PageDto<StudentResponse>> searchStudentsJdbcTemplate(
+            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
+            @RequestParam(name = "pageSize", required = false, defaultValue = "5") Integer pageSize,
+            @RequestParam(name = "email", required = false) String name,
+            @RequestParam(name = "name", required = false) String email,
+            @RequestParam(name = "address", required = false) String address
+    ) {
+        PageDto<StudentResponse> data = studentService.searchStudentsByJdbcTemplate(pageNumber, pageSize, name, email, address);
+        return APIResponse.<PageDto<StudentResponse>>builder().data(data).build();
     }
 
     @GetMapping("{id}")

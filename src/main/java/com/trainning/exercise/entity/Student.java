@@ -14,7 +14,7 @@ import java.time.Instant;
 @Builder
 @Entity
 @Table(name = "students")
-public class Student extends AuditingEntity{
+public class Student extends AuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -31,3 +31,4 @@ public class Student extends AuditingEntity{
     @Column(name = "birthday")
     private Instant birthday;
 }
+
