@@ -4,12 +4,15 @@ import com.trainning.exercise.dto.PageDto;
 import com.trainning.exercise.dto.StudentRequest;
 import com.trainning.exercise.dto.StudentResponse;
 import com.trainning.exercise.entity.Student;
+import com.trainning.exercise.exception.EmailAlreadyExistedException;
+import com.trainning.exercise.exception.InvalidAgeException;
 import com.trainning.exercise.exception.StudentAlreadyExistedException;
 import com.trainning.exercise.exception.StudentNotFoundException;
 import com.trainning.exercise.mapper.StudentMapper;
 import com.trainning.exercise.repository.SearchRepository;
 import com.trainning.exercise.repository.StudentRepository;
 import com.trainning.exercise.service.IStudentService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +29,7 @@ public class StudentService implements IStudentService {
     private final SearchRepository searchRepository;
 
     @Override
+    @Transactional(rollbackOn = { InvalidAgeException.class })
     public Student addStudent(StudentRequest request) {
         if (studentRepository.existsByEmail(request.getEmail())) {
             throw new StudentAlreadyExistedException("Student with email " + request.getEmail() + " already existed.");
@@ -79,6 +83,10 @@ public class StudentService implements IStudentService {
     @Override
     public Student updateStudent(String id, Student student) {
         Student existingStudent = getStudentById(id);
+
+        if (studentRepository.existsByEmail(student.getEmail())) {
+            throw new EmailAlreadyExistedException("Email " + student.getEmail() + " already existed");
+        }
 
         existingStudent.setEmail(student.getEmail());
         existingStudent.setName(student.getName());

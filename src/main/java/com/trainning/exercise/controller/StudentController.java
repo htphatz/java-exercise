@@ -22,7 +22,7 @@ import java.util.List;
 public class StudentController {
     private final StudentService studentService;
 
-    @PostMapping("student")
+    @PostMapping
     @Operation(summary = "Add a new student")
     public APIResponse<Student> addStudent(@Valid @RequestBody StudentRequest request) {
         Student data = studentService.addStudent(request);
