@@ -5,12 +5,14 @@ import com.trainning.exercise.validator.PhoneMaxSize;
 import com.trainning.exercise.validator.PhoneStarWith;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.Instant;
 
 @Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class StudentRequest {
     @NotNull(message = "Email cannot be null")
