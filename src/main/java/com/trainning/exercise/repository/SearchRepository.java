@@ -17,7 +17,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @Slf4j
@@ -29,47 +31,43 @@ public class SearchRepository {
     private JdbcTemplate jdbcTemplate;
 
     public Page<Student> searchStudentsByEntityManager(int pageNumber, int pageSize, String name, String email, String address) {
-        StringBuilder sqlSelect = new StringBuilder("SELECT s FROM Student s WHERE 1=1");
-        StringBuilder sqlCount = new StringBuilder("SELECT COUNT(*) FROM Student s WHERE 1=1");
+        StringBuilder sqlSelect = new StringBuilder("SELECT s FROM Student s");
+        StringBuilder sqlCount = new StringBuilder("SELECT COUNT(s) FROM Student s");
+        StringBuilder sqlPredicate = new StringBuilder();
+
+        Map<String, String> params = new HashMap<>();
 
         // Check if name exist
-        if (StringUtils.hasLength(name)) {
-            sqlSelect.append(" AND s.name LIKE (?1)");
-            sqlCount.append(" AND s.name LIKE (?1)");
+        if (StringUtils.hasText(name)) {
+            appendCondition(sqlPredicate, "s.name LIKE :name");
+            params.put("name", "%" + name + "%");
         }
 
         // Check if email exist
-        if (StringUtils.hasLength(email)) {
-            sqlSelect.append(" AND s.email LIKE (?2)");
-            sqlCount.append(" AND s.email LIKE (?2)");
+        if (StringUtils.hasText(email)) {
+            appendCondition(sqlPredicate, "s.email LIKE :email");
+            params.put("email", "%" + email + "%");
         }
 
         // Check if address exist
-        if (StringUtils.hasLength(address)) {
-            sqlSelect.append(" AND s.address LIKE (?3)");
-            sqlCount.append(" AND s.address LIKE (?3)");
+        if (StringUtils.hasText(address)) {
+            appendCondition(sqlPredicate, "s.address LIKE :address");
+            params.put("address", "%" + address + "%");
         }
 
-        // Select students and count students
+        // Add predicate into sql
+        sqlSelect.append(sqlPredicate);
+        sqlCount.append(sqlPredicate);
+
+        // Create query from sql
         Query querySelect = entityManager.createQuery(sqlSelect.toString());
-        Query queryCount= entityManager.createQuery(sqlCount.toString());
-        if (StringUtils.hasLength(name)) {
-            querySelect.setParameter(1, "%" + name +"%");
-            queryCount.setParameter(1, "%" + name +"%");
-        }
+        Query queryCount = entityManager.createQuery(sqlCount.toString());
 
-        if (StringUtils.hasLength(email)) {
-            querySelect.setParameter(2, "%" + email +"%");
-            queryCount.setParameter(2, "%" + email +"%");
-        }
-
-        if (StringUtils.hasLength(address)) {
-            querySelect.setParameter(3, "%" + address +"%");
-            queryCount.setParameter(3, "%" + address +"%");
-        }
-
-        log.info("Select SQL: {}", sqlSelect.toString());
-        log.info("Count SQL: {}", sqlCount.toString());
+        // Set params
+        params.forEach((key, value) -> {
+            querySelect.setParameter(key, value);
+            queryCount.setParameter(key, value);
+        });
 
         // Select
         querySelect.setFirstResult(pageNumber);
@@ -130,5 +128,13 @@ public class SearchRepository {
         pageNumber--;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return new PageImpl<>(students, pageable, totalStudents);
+    }
+
+    private void appendCondition(StringBuilder predicate, String condition) {
+        if (predicate.isEmpty()) {
+            predicate.append(" WHERE ").append(condition);
+        } else {
+            predicate.append(" AND ").append(condition);
+        }
     }
 }
