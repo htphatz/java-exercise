@@ -6,7 +6,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -85,47 +84,49 @@ public class SearchRepository {
     }
 
     public Page<Student> searchStudentsByJdbcTemplate(int pageNumber, int pageSize, String name, String email, String address) {
-        StringBuilder sqlSelect = new StringBuilder("SELECT * FROM students WHERE 1=1");
-        StringBuilder sqlCount = new StringBuilder("SELECT COUNT(*) FROM students WHERE 1=1");
+        StringBuilder sqlSelect = new StringBuilder("SELECT * FROM students");
+        StringBuilder sqlCount = new StringBuilder("SELECT COUNT(*) FROM students");
+        StringBuilder sqlPredicate = new StringBuilder();
 
-        // Params for select and count SQL
         List<Object> paramsSelect = new ArrayList<>();
         List<Object> paramsCount = new ArrayList<>();
 
-        // Check if name exists
-        if (StringUtils.hasLength(name)) {
-            sqlSelect.append(" AND name LIKE ?");
-            sqlCount.append(" AND name LIKE ?");
+        // Check if name exist
+        if (StringUtils.hasText(name)) {
+            appendCondition(sqlPredicate, "name LIKE ?");
             paramsSelect.add("%" + name + "%");
             paramsCount.add("%" + name + "%");
         }
 
-        // Check if email exists
-        if (StringUtils.hasLength(email)) {
-            sqlSelect.append(" AND email LIKE ?");
-            sqlCount.append(" AND email LIKE ?");
+        // Check if email exist
+        if (StringUtils.hasText(email)) {
+            appendCondition(sqlPredicate, "email LIKE ?");
             paramsSelect.add("%" + email + "%");
             paramsCount.add("%" + email + "%");
         }
 
-        // Check if address exists
-        if (StringUtils.hasLength(address)) {
-            sqlSelect.append(" AND address LIKE ?");
-            sqlCount.append(" AND address LIKE ?");
+        // Check if address exist
+        if (StringUtils.hasText(address)) {
+            appendCondition(sqlPredicate, "address LIKE ?");
             paramsSelect.add("%" + address + "%");
             paramsCount.add("%" + address + "%");
         }
 
-        // Select students
+        // Add predicate into sql
+        sqlSelect.append(sqlPredicate);
+        sqlCount.append(sqlPredicate);
+
+        // Pagination
         sqlSelect.append(" LIMIT ? OFFSET ?");
         paramsSelect.add(pageSize);
         paramsSelect.add(pageNumber * pageSize);
+
+        // Select
         List<Student> students = jdbcTemplate.query(sqlSelect.toString(), paramsSelect.toArray(), new BeanPropertyRowMapper<>(Student.class));
 
-        // Count students
+        // Count
         Long totalStudents = jdbcTemplate.queryForObject(sqlCount.toString(), paramsCount.toArray(), Long.class);
 
-        pageNumber--;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return new PageImpl<>(students, pageable, totalStudents);
     }
