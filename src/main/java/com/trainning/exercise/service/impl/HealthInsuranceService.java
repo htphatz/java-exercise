@@ -11,6 +11,12 @@ public class HealthInsuranceService implements IHealthInsuranceService {
     @Autowired
     private HealthInsuranceRepository healthInsuranceRepository;
 
+    /**
+     * Registers a new health insurance for a student.
+     *
+     * @param studentId The unique identifier of the student for whom the health insurance is being registered.
+     * @return The saved HealthInsurance entity.
+     */
     @Override
     public HealthInsurance registerInsurance(String studentId) {
         HealthInsurance healthInsurance = HealthInsurance.builder()
